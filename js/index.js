@@ -1,7 +1,7 @@
 function getRepositories() {
   const req = new XMLHttpRequest();
-  req.addEventListener('load', displayRepositories);
   let userName = document.getElementById('username').value
+  req.addEventListener('load', displayRepositories);
   req.open('GET', `https://api.github.com/users/${userName}/repos`);
   req.send();
 }
@@ -16,7 +16,8 @@ function displayRepositories() {
         r.name +
         ' - <a href="#" data-repo="' +
         r.name +
-        '" onclick="getCommits(this)">Get Commits</a></li>' +
+        '" onclick="getCommits(this)">Get Commits</a>' +
+        ' - <a href="#" data-repo="' +
         r.name +
         '" onclick="getBranches(this)">Get Branches</a></li>'
     )
@@ -25,10 +26,10 @@ function displayRepositories() {
 }
 
 function getCommits(el) {
-  const name = el.dataset.repo;
+  const name = el.dataset.repository;
   const req = new XMLHttpRequest();
+  const userName = document.getElementById('username').value
   req.addEventListener('load', displayCommits);
-  let userName = document.getElementById('username').value
   req.open('GET', `https://api.github.com/repos/${userName}/` + name + '/commits');
   req.send();
 }
@@ -41,9 +42,32 @@ function displayCommits() {
         '<li><strong>' +
         commit.author.login +
         '</strong> - ' +
-        commit.commit.message +
+        commit.commit.message + 
+        commit.commit.author.name + 
         '</li>'
     )
     .join('')}</ul>`;
   document.getElementById('details').innerHTML = commitsList;
+}
+
+function getBranches(el) {
+  const name = el.dataset.repository;
+  const req = new XMLHttpRequest();
+  const userName = document.getElementById('username').value
+  req.addEventListener('load', displayBranches);
+  req.open('GET', `https://api.github.com/repos/${userName}/` + name + '/branches');
+  req.send();
+}
+
+function displayBranches() {
+  const branches = JSON.parse(this.responseText);
+  const branchesList = `<ul>${branches
+    .map(
+      branch =>
+        '<li>' +
+        branch.name +
+        '</li>'
+    )
+    .join('')}</ul>`;
+  document.getElementById('details').innerHTML = branchesList;
 }
